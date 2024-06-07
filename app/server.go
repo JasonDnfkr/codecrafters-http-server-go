@@ -75,6 +75,7 @@ func ResponseHandler(conn net.Conn) {
 	path := strings.Split(lines[0], " ")[1]
 	if path == "/" {
 		statusLine = createStatusLine(true)
+		conn.Write([]byte(statusLine + CRLF + CRLF))
 	} else if strings.Split(path, "/")[1] == "echo" {
 		body = strings.Split(path, "/")[2]
 		addHeaders("Content-Length", strconv.Itoa(len(body)), &headers)
@@ -92,6 +93,7 @@ func ResponseHandler(conn net.Conn) {
 		statusLine = createStatusLine(false)
 		headers = make(map[string]string)
 		body = ""
+		conn.Write([]byte(statusLine + CRLF + CRLF))
 	}
 
 	resp := createHttpResponse(statusLine, buildHeader(headers), body)
