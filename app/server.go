@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"strconv"
 	"strings"
@@ -132,7 +133,7 @@ func ResponseHandler(conn net.Conn) {
 				fmt.Println(request[idx:])
 				fmt.Println("\n======= BODY END =======")
 
-				err = os.WriteFile(dir+fileName, []byte(body)[:len(body)], 0644)
+				err = os.WriteFile(dir+fileName, bytes.Trim([]byte(body), "\x00"), 0644)
 				if err != nil {
 					fmt.Println("Error writing to file: ", err.Error())
 					os.Exit(1)
