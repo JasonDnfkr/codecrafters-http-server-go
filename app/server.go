@@ -70,6 +70,12 @@ func RespondWithBody(conn net.Conn) {
 	for i, word := range words {
 		if word == "echo" {
 			respStr = words[i+1]
+		} else {
+			_, err := conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+			if err != nil {
+				fmt.Println("Error writing to connection: ", err.Error())
+				return
+			}
 		}
 	}
 
