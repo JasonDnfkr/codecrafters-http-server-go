@@ -147,7 +147,7 @@ func ResponseHandler(conn net.Conn) {
 					os.Exit(1)
 				}
 
-				fmt.Println("----------------------===-" + buf.String())
+				fmt.Printf("----------------------===-%d\n", len(buf.String()))
 
 				body = requestBody
 				addHeaders("Content-Length", strconv.Itoa(len(buf.String())), &headers)
