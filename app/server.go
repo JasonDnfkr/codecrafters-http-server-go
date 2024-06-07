@@ -66,16 +66,21 @@ func RespondWithBody(conn net.Conn) {
 	words := strings.Split(path, "/")
 
 	var respStr string
+	var found bool
 
 	for i, word := range words {
 		if word == "echo" {
 			respStr = words[i+1]
-		} else {
-			_, err := conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
-			if err != nil {
-				fmt.Println("Error writing to connection: ", err.Error())
-				return
-			}
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		_, err := conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+		if err != nil {
+			fmt.Println("Error writing to connection: ", err.Error())
+			os.Exit(1)
 		}
 	}
 
@@ -87,6 +92,10 @@ func RespondWithBody(conn net.Conn) {
 	resp.WriteString("Content-Length: " + strconv.Itoa(len(respStr)))
 	resp.WriteString(CRLF + CRLF)
 	resp.WriteString(respStr)
+
+	fmt.Println("============= response =============")
+	fmt.Println(resp.String())
+	fmt.Println("============= response end =============")
 
 	_, err = conn.Write([]byte(resp.String()))
 	fmt.Printf("echo: %s\n", respStr)
