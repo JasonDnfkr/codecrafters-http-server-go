@@ -49,10 +49,10 @@ func ResponseHandler(conn net.Conn) {
 	}
 
 	for {
-		buffer := make([]byte, 1024)
+		buffer := make([]byte, 2048)
 		_, err := conn.Read(buffer)
 		if err != nil {
-			fmt.Println("Error reading from connection: --------", err.Error())
+			fmt.Println("Error reading from connection: ", err.Error())
 			os.Exit(1)
 		}
 
