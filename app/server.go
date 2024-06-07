@@ -129,6 +129,8 @@ func ResponseHandler(conn net.Conn) {
 				}
 			}
 
+			addHeaders("Content-Type", "text/plain", &headers)
+
 			if gzipFound {
 				statusLine = createStatusLine(true)
 				addHeaders("Content-Encoding", "gzip", &headers)
@@ -147,14 +149,12 @@ func ResponseHandler(conn net.Conn) {
 					os.Exit(1)
 				}
 
-				fmt.Printf("----------------------===-%d\n", len(buf.String()))
-
 				body = requestBody
 				addHeaders("Content-Length", strconv.Itoa(len(buf.String())), &headers)
 			} else {
 				addHeaders("Content-Length", strconv.Itoa(len(body)), &headers)
 			}
-			addHeaders("Content-Type", "text/plain", &headers)
+
 		} else if strings.Split(path, "/")[1] == "user-agent" {
 			fmt.Println("get user agent header")
 			for _, line := range lines {
