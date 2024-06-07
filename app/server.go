@@ -147,15 +147,15 @@ func ResponseHandler(conn net.Conn) {
 					os.Exit(1)
 				}
 
-				body = buf.String()
+				body = requestBody
 
-				fmt.Println("body is: -------------- " + body)
+				addHeaders("Content-Length", strconv.Itoa(len(buf.String())), &headers)
 
 			} else {
 				// TODO
 			}
 			addHeaders("Content-Type", "text/plain", &headers)
-			addHeaders("Content-Length", strconv.Itoa(len(body)), &headers)
+
 		} else if strings.Split(path, "/")[1] == "user-agent" {
 			fmt.Println("get user agent header")
 			for _, line := range lines {
