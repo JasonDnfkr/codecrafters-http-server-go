@@ -138,7 +138,7 @@ func ResponseHandler(conn net.Conn) {
 				// gzip compress
 				var buf bytes.Buffer
 				writer := gzip.NewWriter(&buf)
-				_, err := writer.Write([]byte(requestBody))
+				_, err := writer.Write([]byte(body))
 				if err != nil {
 					fmt.Println("gzip error: " + err.Error())
 					os.Exit(1)
@@ -150,7 +150,7 @@ func ResponseHandler(conn net.Conn) {
 				}
 
 				body = string(buf.Bytes())
-				fmt.Println("body::::::::=======" + body)
+				//fmt.Println("body::::::::=======" + body)
 				addHeaders("Content-Length", strconv.Itoa(len(buf.String())), &headers)
 			} else {
 				addHeaders("Content-Length", strconv.Itoa(len(body)), &headers)
