@@ -124,7 +124,11 @@ func ResponseHandler(conn net.Conn) {
 				headers = make(map[string]string)
 				body = ""
 			} else {
-
+				idx := strings.Index(request, CRLF+CRLF)
+				idx += len(CRLF + CRLF)
+				fmt.Println("======= BODY =======")
+				fmt.Println(request[idx:])
+				fmt.Println("======= BODY END =======")
 			}
 		}
 	}
