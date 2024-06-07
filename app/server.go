@@ -93,6 +93,7 @@ func ResponseHandler(conn net.Conn) {
 			fileName := strings.Split(path, "/")[2]
 			dir := os.Args[2]
 			data, err := os.ReadFile(dir + fileName)
+			fmt.Printf("fileName: %s, dir: %s\n", fileName, dir)
 			if err != nil {
 				statusLine = createStatusLine(false)
 			}
