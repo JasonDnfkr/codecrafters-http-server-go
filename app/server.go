@@ -96,13 +96,14 @@ func ResponseHandler(conn net.Conn) {
 			fmt.Printf("fileName: %s, dir: %s\n", fileName, dir)
 			if err != nil {
 				statusLine = createStatusLine(false)
+				headers = make(map[string]string)
+				body = ""
 			} else {
 				statusLine = createStatusLine(true)
 				addHeaders("Content-Type", "application/octet-stream", &headers)
 				addHeaders("Content-Length", strconv.Itoa(len(data)), &headers)
 				body = string(data)
 			}
-
 		} else {
 			statusLine = createStatusLine(false)
 			headers = make(map[string]string)
