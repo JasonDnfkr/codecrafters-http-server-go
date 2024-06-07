@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"compress/gzip"
 	"fmt"
 	"strconv"
 	"strings"
@@ -131,6 +132,23 @@ func ResponseHandler(conn net.Conn) {
 			if gzipFound {
 				statusLine = createStatusLine(true)
 				addHeaders("Content-Encoding", "gzip", &headers)
+
+				// gzip compress
+				var buf bytes.Buffer
+				writer := gzip.NewWriter(&buf)
+				_, err := writer.Write([]byte(requestBody))
+				if err != nil {
+					fmt.Println("gzip error: " + err.Error())
+					os.Exit(1)
+				}
+				err = writer.Close()
+				if err != nil {
+					fmt.Println("gzip error: " + err.Error())
+					os.Exit(1)
+				}
+
+				body = buf.String()
+
 			} else {
 				// TODO
 			}
