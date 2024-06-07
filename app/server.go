@@ -88,7 +88,7 @@ func ResponseHandler(conn net.Conn) {
 				if strings.HasPrefix(line, "User-Agent:") {
 					// get foobar/1.2.3 ...
 					content := strings.Split(line, " ")[1]
-					addHeaders("Content-Length", strconv.Itoa(len(body)), &headers)
+					addHeaders("Content-Length", strconv.Itoa(len(content)), &headers)
 					body = content
 				}
 			}
