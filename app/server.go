@@ -76,6 +76,7 @@ func ResponseHandler(conn net.Conn) {
 	if path == "/" {
 		statusLine = createStatusLine(true)
 		conn.Write([]byte(statusLine + CRLF + CRLF))
+
 		return
 	} else if strings.Split(path, "/")[1] == "echo" {
 		body = strings.Split(path, "/")[2]
@@ -95,6 +96,7 @@ func ResponseHandler(conn net.Conn) {
 		headers = make(map[string]string)
 		body = ""
 		conn.Write([]byte(statusLine + CRLF + CRLF))
+
 		return
 	}
 
