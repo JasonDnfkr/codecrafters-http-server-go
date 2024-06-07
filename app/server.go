@@ -66,7 +66,7 @@ func RespondWithBody(conn net.Conn) {
 	words := strings.Split(path, "/")
 
 	var respStr string
-	var found bool
+	var found = false
 
 	for i, word := range words {
 		if word == "echo" {
