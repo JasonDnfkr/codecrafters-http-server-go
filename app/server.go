@@ -42,7 +42,7 @@ func ResponseHandler(conn net.Conn) {
 	}
 
 	createHttpResponse := func(statusLine, header, body string) string {
-		return fmt.Sprintf("%s%s%s%s%s", statusLine, CRLF+CRLF, header, CRLF, body)
+		return fmt.Sprintf("%s%s%s%s%s", statusLine, CRLF, header, CRLF, body)
 	}
 
 	buffer := make([]byte, 1024)
