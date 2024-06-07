@@ -72,41 +72,61 @@ func ResponseHandler(conn net.Conn) {
 	addHeaders("Content-Type", "text/plain", &headers)
 	addHeaders("Content-Length", "0", &headers)
 
-	path := strings.Split(lines[0], " ")[1]
-	if path == "/" {
-		statusLine = createStatusLine(true)
-	} else if strings.Split(path, "/")[1] == "echo" {
-		body = strings.Split(path, "/")[2]
-		addHeaders("Content-Length", strconv.Itoa(len(body)), &headers)
-	} else if strings.Split(path, "/")[1] == "user-agent" {
-		fmt.Println("get user agent header")
-		for _, line := range lines {
-			if strings.HasPrefix(line, "User-Agent:") {
-				// get foobar/1.2.3 ...
-				content := strings.Split(line, " ")[1]
-				addHeaders("Content-Length", strconv.Itoa(len(content)), &headers)
-				body = content
+	lineSplit := strings.Split(lines[0], " ")
+	method := lineSplit[0]
+	path := lineSplit[1]
+
+	switch method {
+	case "GET":
+		if path == "/" {
+			statusLine = createStatusLine(true)
+		} else if strings.Split(path, "/")[1] == "echo" {
+			body = strings.Split(path, "/")[2]
+			addHeaders("Content-Length", strconv.Itoa(len(body)), &headers)
+		} else if strings.Split(path, "/")[1] == "user-agent" {
+			fmt.Println("get user agent header")
+			for _, line := range lines {
+				if strings.HasPrefix(line, "User-Agent:") {
+					// get foobar/1.2.3 ...
+					content := strings.Split(line, " ")[1]
+					addHeaders("Content-Length", strconv.Itoa(len(content)), &headers)
+					body = content
+				}
 			}
-		}
-	} else if strings.Split(path, "/")[1] == "files" {
-		fileName := strings.Split(path, "/")[2]
-		dir := os.Args[2]
-		data, err := os.ReadFile(dir + fileName)
-		fmt.Printf("fileName: %s, dir: %s\n", fileName, dir)
-		if err != nil {
+		} else if strings.Split(path, "/")[1] == "files" {
+			fileName := strings.Split(path, "/")[2]
+			dir := os.Args[2]
+			data, err := os.ReadFile(dir + fileName)
+			fmt.Printf("fileName: %s, dir: %s\n", fileName, dir)
+			if err != nil {
+				statusLine = createStatusLine(false)
+				headers = make(map[string]string)
+				body = ""
+			} else {
+				statusLine = createStatusLine(true)
+				addHeaders("Content-Type", "application/octet-stream", &headers)
+				addHeaders("Content-Length", strconv.Itoa(len(data)), &headers)
+				body = string(data)
+			}
+		} else {
 			statusLine = createStatusLine(false)
 			headers = make(map[string]string)
 			body = ""
-		} else {
-			statusLine = createStatusLine(true)
-			addHeaders("Content-Type", "application/octet-stream", &headers)
-			addHeaders("Content-Length", strconv.Itoa(len(data)), &headers)
-			body = string(data)
 		}
-	} else {
-		statusLine = createStatusLine(false)
-		headers = make(map[string]string)
-		body = ""
+
+	case "POST":
+		if strings.Split(path, "/")[1] == "files" {
+			fileName := strings.Split(path, "/")[2]
+			dir := os.Args[2]
+			fmt.Printf("fileName: %s, dir: %s\n", fileName, dir)
+			if err != nil {
+				statusLine = createStatusLine(false)
+				headers = make(map[string]string)
+				body = ""
+			} else {
+
+			}
+		}
 	}
 
 	resp := createHttpResponse(statusLine, buildHeader(headers), body)
