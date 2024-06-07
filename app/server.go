@@ -150,6 +150,7 @@ func ResponseHandler(conn net.Conn) {
 				}
 
 				body = requestBody
+				fmt.Println("body???????????? = " + body)
 				addHeaders("Content-Length", strconv.Itoa(len(buf.String())), &headers)
 			} else {
 				addHeaders("Content-Length", strconv.Itoa(len(body)), &headers)
