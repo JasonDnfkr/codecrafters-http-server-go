@@ -76,9 +76,6 @@ func ResponseHandler(conn net.Conn) {
 		path := strings.Split(lines[0], " ")[1]
 		if path == "/" {
 			statusLine = createStatusLine(true)
-			conn.Write([]byte(statusLine + CRLF + CRLF))
-
-			return
 		} else if strings.Split(path, "/")[1] == "echo" {
 			body = strings.Split(path, "/")[2]
 			addHeaders("Content-Length", strconv.Itoa(len(body)), &headers)
@@ -96,9 +93,6 @@ func ResponseHandler(conn net.Conn) {
 			statusLine = createStatusLine(false)
 			headers = make(map[string]string)
 			body = ""
-			conn.Write([]byte(statusLine + CRLF + CRLF))
-
-			return
 		}
 
 		resp := createHttpResponse(statusLine, buildHeader(headers), body)
@@ -108,61 +102,6 @@ func ResponseHandler(conn net.Conn) {
 		fmt.Println("======== RESPONSE END =======")
 
 		conn.Write([]byte(resp))
-	}
-}
-
-func Response(conn net.Conn) {
-	defer conn.Close()
-
-	buffer := make([]byte, 1024)
-	_, err := conn.Read(buffer)
-	if err != nil {
-		fmt.Println("Error reading from connection: ", err.Error())
-		return
-	}
-
-	bufferString := string(buffer)
-	lines := strings.Split(bufferString, CRLF)
-	for _, line := range lines {
-		fmt.Println(line)
-	}
-
-	path := strings.Split(lines[0], " ")[1]
-	fmt.Println("[Path]" + path)
-	if path == "/" {
-		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
-	} else if strings.Split(path, "/")[1] == "echo" {
-		str := strings.Split(path, "/")[2]
-		var resp strings.Builder
-		resp.WriteString("HTTP/1.1 200 OK")
-		resp.WriteString(CRLF)
-		resp.WriteString("Content-Type: text/plain")
-		resp.WriteString(CRLF)
-		resp.WriteString("Content-Length: " + strconv.Itoa(len(str)))
-		resp.WriteString(CRLF + CRLF)
-		resp.WriteString(str)
-
-		conn.Write([]byte(resp.String()))
-	} else if strings.Split(path, "/")[1] == "user-agent" {
-		fmt.Println("get user agent header")
-		for _, line := range lines {
-			if strings.HasPrefix(line, "User-Agent:") {
-				// get foobar/1.2.3 ...
-				content := strings.Split(line, " ")[1]
-				var resp strings.Builder
-				resp.WriteString("HTTP/1.1 200 OK")
-				resp.WriteString(CRLF)
-				resp.WriteString("Content-Type: text/plain")
-				resp.WriteString(CRLF)
-				resp.WriteString("Content-Length: " + strconv.Itoa(len(content)))
-				resp.WriteString(CRLF + CRLF)
-				resp.WriteString(content)
-
-				conn.Write([]byte(resp.String()))
-			}
-		}
-	} else {
-		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 	}
 }
 
