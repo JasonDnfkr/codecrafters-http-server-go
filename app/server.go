@@ -126,9 +126,21 @@ func ResponseHandler(conn net.Conn) {
 			} else {
 				idx := strings.Index(request, CRLF+CRLF)
 				idx += len(CRLF + CRLF)
+				body = request[idx:]
+
 				fmt.Println("======= BODY =======")
 				fmt.Println(request[idx:])
 				fmt.Println("======= BODY END =======")
+
+				err = os.WriteFile(dir+fileName, []byte(body), 0644)
+				if err != nil {
+					fmt.Println("Error writing to file: ", err.Error())
+					os.Exit(1)
+				}
+
+				statusLine = "HTTP/1.1 201 Created"
+				headers = make(map[string]string)
+				body = ""
 			}
 		}
 	}
