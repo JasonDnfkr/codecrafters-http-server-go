@@ -100,6 +100,7 @@ func ResponseHandler(conn net.Conn) {
 			statusLine = createStatusLine(true)
 			addHeaders("Content-Type", "application/octet-stream", &headers)
 			addHeaders("Content-Length", strconv.Itoa(len(data)), &headers)
+			body = string(data)
 		} else {
 			statusLine = createStatusLine(false)
 			headers = make(map[string]string)
