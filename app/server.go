@@ -115,12 +115,23 @@ func ResponseHandler(conn net.Conn) {
 			// get response body
 			body = strings.Split(path, "/")[2]
 
+			// found gzip
+			gzipFound := false
+
 			// get Accept-Encoding
-			encoding := requestHeaders["Accept-Encoding"]
-			if encoding == "gzip" {
+			encodingLine := requestHeaders["Accept-Encoding"]
+			encodings := strings.Split(encodingLine, ",")
+			for _, encoding := range encodings {
+				encoding = strings.TrimSpace(encoding)
+				if encoding == "gzip" {
+					gzipFound = true
+				}
+			}
+
+			if gzipFound {
 				statusLine = createStatusLine(true)
 				addHeaders("Content-Encoding", "gzip", &headers)
-			} else if encoding == "invalid-encoding" {
+			} else {
 				// TODO
 			}
 			addHeaders("Content-Type", "text/plain", &headers)
