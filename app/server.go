@@ -89,6 +89,16 @@ func ResponseHandler(conn net.Conn) {
 					body = content
 				}
 			}
+		} else if strings.Split(path, "/")[1] == "files" {
+			fileName := strings.Split(path, "/")[2]
+			dir := os.Args[2]
+			data, err := os.ReadFile(dir + fileName)
+			if err != nil {
+				statusLine = createStatusLine(false)
+			}
+			statusLine = createStatusLine(true)
+			addHeaders("Content-Type", "application/octet-stream", &headers)
+			addHeaders("Content-Length", strconv.Itoa(len(data)), &headers)
 		} else {
 			statusLine = createStatusLine(false)
 			headers = make(map[string]string)
