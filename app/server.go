@@ -149,6 +149,8 @@ func ResponseHandler(conn net.Conn) {
 
 				body = buf.String()
 
+				fmt.Println("body is: -------------- " + body)
+
 			} else {
 				// TODO
 			}
