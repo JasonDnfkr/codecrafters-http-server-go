@@ -62,11 +62,11 @@ func ResponseHandler(conn net.Conn) {
 	var body string
 
 	lines := strings.Split(request, CRLF)
-	fmt.Println("======= HTTP REQUEST =======")
+	fmt.Println("\n======= HTTP REQUEST =======")
 	for _, line := range lines {
 		fmt.Println(line)
 	}
-	fmt.Println("======= HTTP REQUEST END =======")
+	fmt.Println("\n======= HTTP REQUEST END =======")
 
 	statusLine = createStatusLine(true)
 	addHeaders("Content-Type", "text/plain", &headers)
@@ -128,9 +128,9 @@ func ResponseHandler(conn net.Conn) {
 				idx += len(CRLF + CRLF)
 				body = request[idx:]
 
-				fmt.Println("======= BODY =======")
+				fmt.Println("\n======= BODY =======")
 				fmt.Println(request[idx:])
-				fmt.Println("======= BODY END =======")
+				fmt.Println("\n======= BODY END =======")
 
 				err = os.WriteFile(dir+fileName, []byte(body), 0644)
 				if err != nil {
