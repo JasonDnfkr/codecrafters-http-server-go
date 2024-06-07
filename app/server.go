@@ -34,6 +34,9 @@ func ResponseHandler(conn net.Conn) {
 
 	buildHeader := func(header map[string]string) string {
 		var resp strings.Builder
+		if len(header) == 0 {
+			return ""
+		}
 		for key, value := range header {
 			resp.WriteString(fmt.Sprintf("%s: %s%s", key, value, CRLF))
 		}
@@ -42,7 +45,7 @@ func ResponseHandler(conn net.Conn) {
 	}
 
 	createHttpResponse := func(statusLine, header, body string) string {
-		return fmt.Sprintf("%s%s%s%s%s", statusLine, CRLF, header, CRLF+CRLF, body)
+		return fmt.Sprintf("%s%s%s%s%s", statusLine, CRLF, header, CRLF, body)
 	}
 
 	buffer := make([]byte, 1024)
@@ -87,6 +90,8 @@ func ResponseHandler(conn net.Conn) {
 		}
 	} else {
 		statusLine = createStatusLine(false)
+		headers = make(map[string]string)
+		body = ""
 	}
 
 	resp := createHttpResponse(statusLine, buildHeader(headers), body)
