@@ -48,7 +48,7 @@ func ResponseHandler(conn net.Conn) {
 		return fmt.Sprintf("%s%s%s%s%s", statusLine, CRLF, header, CRLF, body)
 	}
 
-	buffer := make([]byte, 2048)
+	buffer := make([]byte, 1024)
 	_, err := conn.Read(buffer)
 	if err != nil {
 		fmt.Println("Error reading from connection: ", err.Error())
@@ -132,7 +132,7 @@ func ResponseHandler(conn net.Conn) {
 				fmt.Println(request[idx:])
 				fmt.Println("\n======= BODY END =======")
 
-				err = os.WriteFile(dir+fileName, []byte(body), 0644)
+				err = os.WriteFile(dir+fileName, []byte(body)[:len(body)], 0644)
 				if err != nil {
 					fmt.Println("Error writing to file: ", err.Error())
 					os.Exit(1)
