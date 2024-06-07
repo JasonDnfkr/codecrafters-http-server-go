@@ -79,7 +79,7 @@ func RespondWithBody(conn net.Conn) {
 	resp.WriteString("Content-Type: text/plain")
 	resp.WriteString(CRLF)
 	resp.WriteString("Content-Length: " + strconv.Itoa(len(respStr)))
-	resp.WriteString(CRLF)
+	resp.WriteString(CRLF + CRLF)
 	resp.WriteString(respStr)
 
 	_, err = conn.Write([]byte(resp.String()))
