@@ -116,7 +116,7 @@ func ResponseHandler(conn net.Conn) {
 			body = strings.Split(path, "/")[2]
 
 			// get Accept-Encoding
-			encoding := headers["Accept-Encoding"]
+			encoding := requestHeaders["Accept-Encoding"]
 			if encoding == "gzip" {
 				statusLine = createStatusLine(true)
 				addHeaders("Content-Encoding", "gzip", &headers)
