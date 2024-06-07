@@ -23,9 +23,12 @@ func Response(conn net.Conn) {
 	}
 
 	bufferString := string(buffer)
-	fmt.Println(bufferString)
+	lines := strings.Split(bufferString, CRLF)
+	for _, line := range lines {
+		fmt.Println(line)
+	}
 
-	path := strings.Split(bufferString, " ")[1]
+	path := strings.Split(lines[0], " ")[1]
 	fmt.Println("[Path]" + path)
 	if path == "/" {
 		conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
@@ -41,6 +44,24 @@ func Response(conn net.Conn) {
 		resp.WriteString(str)
 
 		conn.Write([]byte(resp.String()))
+	} else if strings.Split(path, "/")[1] == "user-agent" {
+		fmt.Println("get user agent header")
+		for _, line := range lines {
+			if strings.HasPrefix(line, "User-Agent:") {
+				// get foobar/1.2.3 ...
+				content := strings.Split(line, " ")[1]
+				var resp strings.Builder
+				resp.WriteString("HTTP/1.1 200 OK")
+				resp.WriteString(CRLF)
+				resp.WriteString("Content-Type: text/plain")
+				resp.WriteString(CRLF)
+				resp.WriteString("Content-Length: " + strconv.Itoa(len(content)))
+				resp.WriteString(CRLF + CRLF)
+				resp.WriteString(content)
+
+				conn.Write([]byte(resp.String()))
+			}
+		}
 	} else {
 		conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
 	}
