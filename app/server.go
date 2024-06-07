@@ -15,39 +15,66 @@ const CRLF = "\r\n"
 const RESPONSE_OK = "HTTP/1.1 200 OK"
 const RESPONSE_FAILED = "HTTP/1.1 404 Not Found"
 
+func createStatusLine(isSuccess bool) string {
+	if isSuccess {
+		return RESPONSE_OK
+	} else {
+		return RESPONSE_FAILED
+	}
+}
+
+func addHeaders(headerType string, headerValue string, header *map[string]string) {
+	if *header == nil {
+		*header = make(map[string]string)
+	}
+	(*header)[headerType] = headerValue
+}
+
+func buildHeader(header map[string]string) string {
+	var resp strings.Builder
+	if len(header) == 0 {
+		return ""
+	}
+	for key, value := range header {
+		resp.WriteString(fmt.Sprintf("%s: %s%s", key, value, CRLF))
+	}
+
+	return resp.String()
+}
+
+func createHttpResponse(statusLine, header, body string) string {
+	return fmt.Sprintf("%s%s%s%s%s", statusLine, CRLF, header, CRLF, body)
+}
+
+func getHeaders(request string) map[string]string {
+	lines := strings.Split(request, "\r\n")
+
+	headers := make(map[string]string)
+
+	for i, line := range lines {
+		if i == 0 {
+			continue
+		}
+		pos := strings.Index(line, ":")
+		if pos < 0 {
+			break
+		}
+		header := line[0:pos]
+		value := strings.TrimSpace(line[pos+1:])
+		headers[header] = value
+	}
+
+	return headers
+}
+
+func getBody(request string) string {
+	idx := strings.Index(request, CRLF+CRLF)
+	idx += len(CRLF + CRLF)
+	return request[idx:]
+}
+
 func ResponseHandler(conn net.Conn) {
 	defer conn.Close()
-
-	createStatusLine := func(isSuccess bool) string {
-		if isSuccess {
-			return RESPONSE_OK
-		} else {
-			return RESPONSE_FAILED
-		}
-	}
-
-	addHeaders := func(headerType string, headerValue string, header *map[string]string) {
-		if *header == nil {
-			*header = make(map[string]string)
-		}
-		(*header)[headerType] = headerValue
-	}
-
-	buildHeader := func(header map[string]string) string {
-		var resp strings.Builder
-		if len(header) == 0 {
-			return ""
-		}
-		for key, value := range header {
-			resp.WriteString(fmt.Sprintf("%s: %s%s", key, value, CRLF))
-		}
-
-		return resp.String()
-	}
-
-	createHttpResponse := func(statusLine, header, body string) string {
-		return fmt.Sprintf("%s%s%s%s%s", statusLine, CRLF, header, CRLF, body)
-	}
 
 	buffer := make([]byte, 512)
 	_, err := conn.Read(buffer)
@@ -56,7 +83,10 @@ func ResponseHandler(conn net.Conn) {
 		os.Exit(1)
 	}
 
-	request := string(buffer)
+	request := string(bytes.Trim(buffer, "\x00"))
+
+	requestHeaders := getHeaders(request)
+	requestBody := getBody(request)
 
 	var statusLine string
 	var headers map[string]string
@@ -82,7 +112,18 @@ func ResponseHandler(conn net.Conn) {
 		if path == "/" {
 			statusLine = createStatusLine(true)
 		} else if strings.Split(path, "/")[1] == "echo" {
+			// get response body
 			body = strings.Split(path, "/")[2]
+
+			// get Accept-Encoding
+			encoding := headers["Accept-Encoding"]
+			if encoding == "gzip" {
+				statusLine = createStatusLine(true)
+				addHeaders("Content-Encoding", "gzip", &headers)
+			} else if encoding == "invalid-encoding" {
+				// TODO
+			}
+			addHeaders("Content-Type", "text/plain", &headers)
 			addHeaders("Content-Length", strconv.Itoa(len(body)), &headers)
 		} else if strings.Split(path, "/")[1] == "user-agent" {
 			fmt.Println("get user agent header")
@@ -125,15 +166,11 @@ func ResponseHandler(conn net.Conn) {
 				headers = make(map[string]string)
 				body = ""
 			} else {
-				idx := strings.Index(request, CRLF+CRLF)
-				idx += len(CRLF + CRLF)
-				body = request[idx:]
-
 				fmt.Println("\n======= BODY =======")
-				fmt.Println(request[idx:])
+				fmt.Println(requestBody)
 				fmt.Println("\n======= BODY END =======")
 
-				err = os.WriteFile(dir+fileName, bytes.Trim([]byte(body), "\x00"), 0644)
+				err = os.WriteFile(dir+fileName, []byte(requestBody), 0644)
 				if err != nil {
 					fmt.Println("Error writing to file: ", err.Error())
 					os.Exit(1)
