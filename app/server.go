@@ -25,5 +25,40 @@ func main() {
 		os.Exit(1)
 	}
 
-	conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+	buffer := make([]byte, 1024)
+	_, err = conn.Read(buffer)
+	if err != nil {
+		fmt.Println("Error reading from connection: ", err.Error())
+		os.Exit(1)
+	}
+
+	bufferStr := string(buffer)
+
+	//fmt.Println("=============================")
+	//fmt.Println(bufferStr)
+	//fmt.Println("=============================")
+
+	for i := 0; i < len(bufferStr); i++ {
+		if bufferStr[i] == '/' {
+			idx := i + 1
+			for idx < len(bufferStr) && bufferStr[idx] == ' ' {
+				idx++
+			}
+			if bufferStr[idx:idx+4] == "HTTP" {
+				_, err := conn.Write([]byte("HTTP/1.1 200 OK\r\n\r\n"))
+				fmt.Printf("Response 200 Completed")
+				if err != nil {
+					fmt.Println("Error writing to connection: ", err.Error())
+					os.Exit(1)
+				}
+				break
+			} else {
+				_, err := conn.Write([]byte("HTTP/1.1 404 Not Found\r\n\r\n"))
+				if err != nil {
+					fmt.Println("Error writing to connection: ", err.Error())
+					os.Exit(1)
+				}
+			}
+		}
+	}
 }
